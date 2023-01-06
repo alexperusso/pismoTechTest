@@ -1,0 +1,57 @@
+server:
+  port: 8061
+
+  servlet:
+    context-path: /contamsvc
+
+spring:
+  application:
+    name: contasvc
+
+  zipkin:
+    sender:
+      type: web
+    baseUrl: http://zipkinsrv:9411
+
+  sleuth:
+    sampler:
+      probability: 1.0
+
+  data:
+    mongodb:
+      host: mongosrv
+      port: 27017
+      authentication-database: admin
+      username: root
+      password: root
+      database: cartoes
+
+ribbon:
+  ServerListRefreshInterval: 5000
+  NFLoadBalancerPingInterval: 5
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway.route.RouteDefinitionRouteLocator: INFO
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.web.server.adapter.HttpWebHandlerAdapter: TRACE
+
+eureka:
+  instance:
+    hostname: eurekasrv
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:8761/eureka
+      initialInstanceInfoReplicationIntervalSeconds: 5
+      registryFetchIntervalSeconds: 5
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

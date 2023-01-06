@@ -1,0 +1,15 @@
+spring:
+  cloud.gateway.routes:
+    - id: conta-svc
+      uri: lb://contasvc
+      predicates:
+        - Path=/microcontas/**
+      filters:
+        - RewritePath=/microcontas/?(?<segment>.*), /$\{segment}
+
+    - id: transaction-svc
+      uri: lb://transactionsvc
+      predicates:
+      - Path=/microtransaction/**
+      filters:
+      - RewritePath=/microtransaction/?(?<segment>.*), /$\{segment}

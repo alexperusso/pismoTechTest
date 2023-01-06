@@ -1,0 +1,48 @@
+server:
+  port: 8060
+
+spring:
+  application:
+    name: contasvc
+
+  config:
+    import: routes.yaml
+
+  zipkin:
+    sender:
+      type: web
+    baseUrl: http://zipkinsrv:9411
+
+  sleuth:
+    sampler:
+      probability: 1.0
+
+ribbon:
+  ServerListRefreshInterval: 5000
+  NFLoadBalancerPingInterval: 5
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway.route.RouteDefinitionRouteLocator: INFO
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.web.server.adapter.HttpWebHandlerAdapter: TRACE
+
+eureka:
+  instance:
+    hostname: eurekasrv
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:8761/eureka
+      initialInstanceInfoReplicationIntervalSeconds: 5
+      registryFetchIntervalSeconds: 5
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

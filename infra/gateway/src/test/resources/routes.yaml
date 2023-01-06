@@ -1,0 +1,8 @@
+spring:
+  cloud.gateway.routes:
+    - id: conta-svc
+      uri: http://localhost:${wiremock.server.port}/teste
+      predicates:
+        - Path=/contas/**
+      filters:
+        - RewritePath=/contas/?(?<segment>.*), /$\{segment}
