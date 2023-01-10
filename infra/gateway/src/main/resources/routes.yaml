@@ -3,13 +3,13 @@ spring:
     - id: conta-svc
       uri: lb://contasvc
       predicates:
-        - Path=/microcontas/**
+        - Path=/v1/microconta/**
       filters:
-        - RewritePath=/microcontas/?(?<segment>.*), /$\{segment}
+        - RewritePath=/v1/microconta/(?<segment>.*), /contamsvc/v1/$\{segment}
 
     - id: transaction-svc
       uri: lb://transactionsvc
       predicates:
-      - Path=/microtransaction/**
+      - Path=/v1/microtransaction/**
       filters:
-      - RewritePath=/microtransaction/?(?<segment>.*), /$\{segment}
+      - RewritePath=/v1/microtransaction/(?<segment>.*), /transacaomsvc/v1/$\{segment}
