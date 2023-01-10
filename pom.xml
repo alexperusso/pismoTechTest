@@ -8,6 +8,7 @@
 	<modules>
         <module>api</module>
 		<module>util</module>
+		<module>infra/test</module>
 		<module>infra/gateway</module>
 		<module>infra/discovery</module>
 		<module>microsvc/conta</module>

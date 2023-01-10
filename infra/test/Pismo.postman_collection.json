@@ -1,0 +1,280 @@
+{
+	"info": {
+		"_postman_id": "6f19898a-8bea-48c0-aaec-a5e6a68c7388",
+		"name": "Pismo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Gateway",
+			"item": [
+				{
+					"name": "conta",
+					"item": [
+						{
+							"name": "Consulta Conta",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"document_number\" : \"43538917078\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8060/v1/microconta/accounts/63bc8aa45c42dd3778e3dc08",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8060",
+									"path": [
+										"v1",
+										"microconta",
+										"accounts",
+										"63bc8aa45c42dd3778e3dc08"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Nova Conta",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"document_number\" : \"43538917078\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8060/v1/microconta/accounts",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8060",
+									"path": [
+										"v1",
+										"microconta",
+										"accounts"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "transacao",
+					"item": [
+						{
+							"name": "Nova Transacao Copy",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"account_id\":\"63bcdba063d13221a879a915\",\r\n    \"operation_type_id\": 2,\r\n    \"amount\" : 223.45\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8060/v1/microtransaction/transactions/",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8060",
+									"path": [
+										"v1",
+										"microtransaction",
+										"transactions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Consulta Transacao",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8060/v1/microtransaction/transactions/63bcdba063d13221a879a915",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8060",
+									"path": [
+										"v1",
+										"microtransaction",
+										"transactions",
+										"63bcdba063d13221a879a915"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "conta",
+			"item": [
+				{
+					"name": "Nova Conta",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"document_number\" : \"43538917078\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8061/contamsvc/v1/accounts",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8061",
+							"path": [
+								"contamsvc",
+								"v1",
+								"accounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Consulta Conta",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8061/contamsvc/v1/accounts/63bcdba063d13221a879a915",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8061",
+							"path": [
+								"contamsvc",
+								"v1",
+								"accounts",
+								"63bcdba063d13221a879a915"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "transacao",
+			"item": [
+				{
+					"name": "Consulta Transacao",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8062/transacaomsvc/v1/transactions/63bcdba063d13221a879a915",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8062",
+							"path": [
+								"transacaomsvc",
+								"v1",
+								"transactions",
+								"63bcdba063d13221a879a915"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Nova Transacao",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"account_id\":\"63bcdba063d13221a879a915\",\r\n    \"operation_type_id\": 4,\r\n    \"amount\" : 123.45\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8062/transacaomsvc/v1/transactions/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8062",
+							"path": [
+								"transacaomsvc",
+								"v1",
+								"transactions",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
