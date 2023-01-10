@@ -5,7 +5,7 @@ services:
     networks:
       - rede
     deploy:
-      resource:
+      resources:
         limits:
           memory: 350M
     environment:
@@ -26,18 +26,18 @@ services:
   mongoweb:
     image: docker.io/library/mongo-express:1.0.0-alpha
     deploy:
-      resource:
+      resources:
         limits:
-          memory: 350M
+          memory: 256M
     networks:
       - rede
     ports:
       - "7071:8081"
     environment:
-      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_SERVER=mongosrv
       - ME_CONFIG_MONGODB_PORT=27017
-      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-      #- ME_CONFIG_MONGODB_AUTH_DATABASE=project
+      #- ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      - ME_CONFIG_MONGODB_AUTH_DATABASE=admin
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
       - ME_CONFIG_MONGODB_ADMINPASSWORD=root
       - ME_CONFIG_BASICAUTH_USERNAME=mongoexpress
@@ -52,31 +52,11 @@ services:
     depends_on:
       - mongosrv
 
-
-  #mensageria utilizada pela infra e servicos
-  rabbitmq:
-    image: docker.io/library/rabbitmq:3.11.5-management
-    deploy:
-      resource:
-        limits:
-          memory: 128M
-    networks:
-      - rede
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    restart: on-failure
-    healthcheck:
-      test: [ "CMD", "rabbitmqctl", "status" ]
-      interval: 20s
-      timeout: 5s
-      retries: 10
-
   #centralizacao de logs
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
+  elasticsrv:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
     deploy:
-      resource:
+      resources:
         limits:
           memory: 512M
     networks:
@@ -96,60 +76,74 @@ services:
 
   #Visualizacao dos logs centralizados    
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.8
+    image: docker.elastic.co/kibana/kibana:7.17.7
     deploy:
-      resource:
+      resources:
         limits:
-          memory: 128M
+          memory: 350M
     networks:
       - rede
+    links:
+      - elasticsrv
     ports:
       - "5601:5601"
     environment:
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - SERVER_HOST="0"
+      #- ELASTICSEARCH_URL=http://elasticsrv:9200
+      - ELASTICSEARCH_HOSTS='[ "http://localhost:9200" ]'
     depends_on:
-      - elasticsearch
+      - elasticsrv
   
   #Coletor de traces e exibicao na UI
-  zipkin:
-    image: docker.io/openzipkin/zipkin:2.12.9
+  zipkinsrv:
+    image: docker.io/openzipkin/zipkin:2.24.0
     deploy:
-      resource:
+      resources:
         limits:
-          memory: 128M
+          memory: 1024M
     networks:
       - rede
+    links:
+      - elasticsrv
     environment:
-      #- STORAGE_TYPE: mem
       - STORAGE_TYPE=elasticsearch
-      - ES_HOSTS=http://elasticsearch:9200
-      - RABBIT_ADDRESSES=rabbitmq:5672
-      - RABBIT_QUEUE=zipkin
-      - RABBIT_USER=guest
-      - RABBIT_PASSWORD=guest
-      #- RABBIT_VIRTUAL_HOST=app_vhost
-      - RABBIT_USE_SSL=false
-      #- RABBIT_CONCURRENCY=1
-      - RABBIT_CONNECTION_TIMEOUT=60000
+      - ES_HOSTS=http://elasticsrv:9200
     ports:
       - "9411:9411"
     depends_on:
-      - rabbitmq
-      - elasticsearch
+      - elasticsrv
     restart: on-failure
     healthcheck:
       test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9411/health  || exit 1" ]
       interval: 10s
-      start_period: 15s
       retries: 3
+
+  zipkindep:
+    image: docker.io/openzipkin/zipkin-dependencies
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+    networks:
+      - rede
+    links:
+      - elasticsrv
+      - zipkinsrv
+    environment:
+      - STORAGE_TYPE=elasticsearch
+      - ES_HOSTS=http://elasticsrv:9200
+      - ES_NODES_WAN_ONLY=true
+    depends_on:
+      - elasticsrv
+      - zipkinsrv
 
   #microservicos de infra
   eurekasrv:
     build: infra/discovery
     deploy:
-      resource:
+      resources:
         limits:
-          memory: 128M
+          memory: 256M
     networks:
       - rede
     ports:
@@ -160,9 +154,9 @@ services:
     depends_on:
       - eurekasrv
     deploy:
-      resource:
+      resources:
         limits:
-          memory: 128M
+          memory: 350M
     networks:
       - rede
     ports:
@@ -175,11 +169,11 @@ services:
       - eurekasrv
       - gateway
       - mongosrv
-      - zipkin
+      - zipkinsrv
     deploy:
-      resource:
+      resources:
         limits:
-          memory: 128M
+          memory: 350M
     networks:
       - rede
     ports:
@@ -191,11 +185,11 @@ services:
       - eurekasrv
       - gateway
       - mongosrv
-      - zipkin
+      - zipkinsrv
     deploy:
-      resource:
+      resources:
         limits:
-          memory: 128M
+          memory: 350M
     networks:
       - rede
     ports:
@@ -203,7 +197,6 @@ services:
 
 networks:
   rede:
-    name: rede
 
 volumes:
   mongodata:
