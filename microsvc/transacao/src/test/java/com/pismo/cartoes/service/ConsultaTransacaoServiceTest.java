@@ -1,6 +1,5 @@
 package com.pismo.cartoes.service;
 
-import com.pismo.apicartoes.transacao.OperacaoContaCartao;
 import com.pismo.apicartoes.transacao.OperationType;
 import com.pismo.apicartoes.transacao.TransacaoCartao;
 import com.pismo.cartoes.persistence.TransacaoDocument;
@@ -18,17 +17,15 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = {ConsultaTransacaoService.class, TransacaoMapperImpl.class})
 class ConsultaTransacaoServiceTest {
@@ -56,7 +53,7 @@ class ConsultaTransacaoServiceTest {
                 LocalDateTime.now());
 
         when(transacaoRepository.findAllByAccountId(anyString()))
-                .thenReturn(Arrays.asList(transacaoDocument));
+                .thenReturn(List.of(transacaoDocument));
 
 
         List<TransacaoCartao> transacoesPorConta = consultaTransacaoService.buscarTransacoesPorConta(accountId);
