@@ -15,19 +15,21 @@ spring:
 
   sleuth:
     sampler:
-      percentage: 1.0
+      probability: 1.0
 
-#ribbon:
-#  ServerListRefreshInterval: 5000
-#  NFLoadBalancerPingInterval: 5
+ribbon:
+  eureka:
+    enabled: true
 
 logging:
+  file:
+    name: '/mylogs/gateway_elk.log'
   level:
-    root: INFO
+    root: TRACE
     org.springframework.cloud.gateway.route.RouteDefinitionRouteLocator: INFO
     org.springframework.cloud.gateway: TRACE
     org.springframework.web.server.adapter.HttpWebHandlerAdapter: TRACE
-
+    org.pismo.infra: TRACE
 
 eureka:
   instance:

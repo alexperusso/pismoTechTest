@@ -8,7 +8,7 @@ spring:
 
   sleuth:
     sampler:
-      percentage: 0
+      probability: 0
 
   data:
     mongodb:
@@ -26,3 +26,13 @@ eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
+
+ribbon:
+  eureka:
+    enabled: false
+
+logging:
+  file: logs/transacao_elk.log
+  level:
+    root: INFO
+    com.pismo.cartoes: TRACE

@@ -3,6 +3,7 @@ package com.pismo.cartoes.service;
 import com.pismo.apicartoes.transacao.TransacaoCartao;
 import com.pismo.cartoes.persistence.TransacaoRepository;
 import com.pismo.cartoes.service.mapper.TransacaoMapper;
+import com.pismo.util.annotation.LocalPerformanceTrace;
 import com.pismo.util.exception.NotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ public class ConsultaTransacaoService {
     private TransacaoRepository transacaoRepository;
     private TransacaoMapper transacaoMapper;
 
+    @LocalPerformanceTrace
     public List<TransacaoCartao> buscarTransacoesPorConta(String accountId) {
         log.trace("Localizando transacoes para conta {}", accountId);
 

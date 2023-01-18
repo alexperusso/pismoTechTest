@@ -1,0 +1,56 @@
+version: '3'
+services:
+  # docker compose -f docker-compose.yml -f docker-compose.central_log.yml
+  #centralizacao de logs
+  logsrv:
+    image: docker.elastic.co/logstash/logstash:7.17.7
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+    networks:
+      - rede
+    links:
+      - elasticsrv
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    restart: on-failure
+    environment:
+      - XPACK_MONITORING_ENABLED=false
+    volumes:
+      - ./infra/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./infra/logstash/pipeline:/usr/share/logstash/pipeline
+    depends_on:
+      - elasticsrv
+
+
+  filebeatsrv:
+    image: docker.elastic.co/beats/filebeat:7.17.7
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+    networks:
+      - rede
+    links:
+      - elasticsrv
+      - kibana
+      - logsrv
+    restart: on-failure
+    environment:
+      - KIBANA_HOST="kibana:5601"
+      - output.elasticsearch.hosts=["elasticsrv:9200"]
+    volumes:
+      - ./logs:/var/log
+      - ./infra/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+    depends_on:
+      - elasticsrv
+      - kibana
+      - logsrv
+    command: --strict.perms=false -e
+    healthcheck:
+      test: filebeat test config
+      interval: 60s
+      timeout: 40s
+      retries: 5

@@ -8,7 +8,7 @@ spring:
 
   sleuth:
     sampler:
-      percentage: 0
+      probability: 0
 
   data:
     mongodb:
@@ -19,6 +19,10 @@ spring:
       password: root
       database: cartoes
 
+ribbon:
+  eureka:
+    enabled: false
+
 eureka:
   instance:
     hostname: localhost
@@ -26,3 +30,6 @@ eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
+
+logging:
+  file: logs/gateway_elk.log

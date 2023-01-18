@@ -18,7 +18,7 @@ services:
       - mongodata:/data/db
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", 'db.runCommand("ping").ok', "|", "mongo", "localhost:27017/cartoes", "--quiet" ]
+      test: ["CMD", "mongo", "--quiet", "--eval", "'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -44,11 +44,6 @@ services:
       - ME_CONFIG_BASICAUTH_PASSWORD=mongoexpress
     links:
       - mongosrv
-    healthcheck:
-      test: [ "CMD", "wget", "--no-verbose", "--tries=3", "--spider", "http://mongoexpress:mongoexpress@mongoweb:8081  || exit 1" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     depends_on:
       - mongosrv
 
@@ -73,23 +68,58 @@ services:
       - xpack.security.enabled=false
     volumes:
       - elastic:/usr/share/elasticsearch/data
+    healthcheck:
+      test: curl -s http://localhost:9200 > dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+      interval: 60s
+      timeout: 40s
+      retries: 3
 
-  #Visualizacao dos logs centralizados    
   kibana:
     image: docker.elastic.co/kibana/kibana:7.17.7
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 368M
     networks:
       - rede
     ports:
       - "5601:5601"
     environment:
-      - ELASTICSEARCH_URL=http://elasticsrv:9200
+      - ELASTICSEARCH_HOSTS=http://elasticsrv:9200
     depends_on:
       - elasticsrv
-  
+    healthcheck:
+      test: curl -s http://localhost:5601 > dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+      interval: 60s
+      timeout: 40s
+      retries: 3
+
+  apmsrv:
+    image: docker.elastic.co/apm/apm-server:7.17.7-amd64
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    networks:
+      - rede
+    ports:
+      - "8200:8200"
+    links:
+      - elasticsrv
+      - kibana
+    environment:
+      - ES_HOSTS="http://elasticsrv:9200"
+    volumes:
+      - ./infra/apm/apm-server.docker.yml:/usr/share/apm-server/apm-server.yml"
+    depends_on:
+      - elasticsrv
+      - kibana
+    healthcheck:
+      test: curl -s http://localhost:8200/healthcheck > dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+      interval: 60s
+      timeout: 40s
+      retries: 3
+
   #Coletor de traces e exibicao na UI
   zipkinsrv:
     image: docker.io/openzipkin/zipkin:2.24.0
@@ -109,17 +139,17 @@ services:
     depends_on:
       - elasticsrv
     restart: on-failure
-    healthcheck:
-      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9411/health  || exit 1" ]
-      interval: 10s
-      retries: 3
+    #healthcheck:
+    #  test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9411/health  || exit 1" ]
+    #  interval: 10s
+    #  retries: 3
 
   zipkindep:
     image: docker.io/openzipkin/zipkin-dependencies
     deploy:
       resources:
         limits:
-          memory: 1024M
+          memory: 350M
     networks:
       - rede
     links:
@@ -139,7 +169,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 350M
     networks:
       - rede
     ports:
@@ -157,6 +187,8 @@ services:
       - rede
     ports:
       - "8060:8060"
+    volumes:
+      - ./logs:/mylogs
 
   #microservicos de negocio
   contasrv:
@@ -174,6 +206,8 @@ services:
       - rede
     ports:
       - "8061:8061"
+    volumes:
+      - ./logs:/mylogs
 
   transacaosrv:
     build: microsvc/transacao
@@ -182,12 +216,19 @@ services:
       - gateway
       - mongosrv
       - zipkinsrv
+      - apmsrv
     deploy:
       resources:
         limits:
           memory: 350M
     networks:
       - rede
+    volumes:
+      - ./logs:/mylogs
+    environment:
+      - "ELASTIC_APM_SERVICE_NAME=transacao"
+      - "ELASTIC_APM_APPLICATION_PACKAGES=com.pismo.cartoes"
+      - "ELASTIC_APM_SERVER_URLS=http://apmsrv:8200"
     ports:
       - "8062:8062"
 

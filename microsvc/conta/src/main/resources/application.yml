@@ -15,7 +15,7 @@ spring:
 
   sleuth:
     sampler:
-      percentage: 1.0
+      probability: 1.0
 
   data:
     mongodb:
@@ -27,15 +27,15 @@ spring:
       database: cartoes
 
 ribbon:
-  ServerListRefreshInterval: 5000
-  NFLoadBalancerPingInterval: 5
+  eureka:
+    enabled: true
 
 logging:
+  file:
+    name: '/mylogs/conta_elk.log'
   level:
     root: INFO
-    org.springframework.cloud.gateway.route.RouteDefinitionRouteLocator: INFO
-    org.springframework.cloud.gateway: TRACE
-    org.springframework.web.server.adapter.HttpWebHandlerAdapter: TRACE
+    org.pismo.cartoes: TRACE
 
 eureka:
   instance:

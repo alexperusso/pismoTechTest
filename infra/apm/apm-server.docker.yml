@@ -1,0 +1,28 @@
+######################### APM Server Configuration #########################
+# https://medium.com/@sece.cosmin/monitor-spring-boot-application-performance-with-elastic-apm-elasticsearch-and-kibana-8d4299cad2be
+# https://www.elastic.co/guide/en/apm/guide/master/running-on-docker.html
+# https://raw.githubusercontent.com/elastic/apm-server/master/apm-server.docker.yml
+################################ APM Server ################################
+
+apm-server:
+  host: "0.0.0.0:8200"
+  kibana:
+    enabled: true
+    host: "http://kibana:5601"
+  rum:
+    enabled: true
+    allow_origins: ['*']
+  aggregation:
+    transactions:
+      enabled: true
+    sampling:
+      keep_unsampled: false
+
+max_procs: 1
+
+output.elasticsearch:
+  hosts: ${ES_HOSTS}
+  worker: 1
+
+logging.level: info
+logging.to_files: false

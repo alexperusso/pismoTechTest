@@ -1,5 +1,7 @@
 package com.pismo.cartoes.service;
 
+import co.elastic.apm.api.CaptureSpan;
+import co.elastic.apm.api.CaptureTransaction;
 import com.pismo.apicartoes.transacao.OperacaoContaCartao;
 import com.pismo.apicartoes.transacao.OperationType;
 import com.pismo.apicartoes.transacao.TransacaoCartao;
@@ -9,6 +11,9 @@ import com.pismo.cartoes.service.mapper.TransacaoMapper;
 import com.pismo.util.exception.InvalidInputException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.sleuth.annotation.ContinueSpan;
+import org.springframework.cloud.sleuth.annotation.NewSpan;
+import org.springframework.cloud.sleuth.annotation.SpanTag;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,10 +26,21 @@ public class ArmazenaTransacaoService {
     private TransacaoRepository transacaoRepository;
     private TransacaoMapper transacaoMapper;
 
+    @NewSpan(name = "armazenaTransacao")
+    @CaptureSpan(value="salvar") //Kibana APM Server
     public TransacaoCartao salvar(OperacaoContaCartao operacaoContaCartao) {
         log.trace("Armazenando nova transacao");
 
         TransacaoDocument transacaoDocument = this.criarTransacao(operacaoContaCartao);
+
+        transacaoDocument = armazenarTransacao(operacaoContaCartao, transacaoDocument);
+
+        log.debug("Transacao armazenada");
+        return transacaoMapper.entityToApi(transacaoDocument);
+    }
+
+    @CaptureTransaction(type = "Task", value = "Armazenamento")
+    private TransacaoDocument armazenarTransacao(OperacaoContaCartao operacaoContaCartao, TransacaoDocument transacaoDocument) {
         try {
             transacaoDocument = transacaoRepository.save(transacaoDocument);
         } catch (Exception excp) {
@@ -32,12 +48,11 @@ public class ArmazenaTransacaoService {
             log.error("Erro ao armazenar transacao", excp);
             throw new InvalidInputException(excp.getMessage());
         }
-
-        log.debug("Transacao armazenada");
-        return transacaoMapper.entityToApi(transacaoDocument);
+        return transacaoDocument;
     }
 
-    private TransacaoDocument criarTransacao(final OperacaoContaCartao operacaoContaCartao) {
+    @ContinueSpan(log = "traduzTransacao")
+    private TransacaoDocument criarTransacao(@SpanTag("transacao") final OperacaoContaCartao operacaoContaCartao) {
         log.trace("Criando Documento de transacao");
 
         TransacaoDocument transacaoDocument = new TransacaoDocument();

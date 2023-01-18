@@ -3,6 +3,7 @@ package com.pismo.cartoes.service;
 import com.pismo.apicartoes.conta.DocumentoConta;
 import com.pismo.cartoes.persistence.ContasDocument;
 import com.pismo.cartoes.persistence.ContasRepository;
+import com.pismo.util.annotation.LocalPerformanceTrace;
 import com.pismo.util.exception.NotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 public class ConsultarContaService {
 
     private ContasRepository contasRepository;
+
+    @LocalPerformanceTrace
     public DocumentoConta buscar(String accountId) {
         log.trace("Localizando conta {}", accountId);
 

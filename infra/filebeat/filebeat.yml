@@ -1,0 +1,26 @@
+filebeat.inputs:
+  - type: filestream
+    id: log-files
+    paths:
+      - /var/log/*.log.json
+    parsers:
+      - ndjson:
+          keys_under_root: true
+          overwrite_keys: true
+          add_error_key: true
+          expand_keys: true
+
+output:
+  logstash:
+    enabled: true
+    hosts: ["logsrv:5044"]
+
+setup:
+  kibana:
+    host: "kibana:5601"
+    protocol: "http"
+  dashboards:
+    enabled: true
+
+xpack.monitoring:
+  enabled: false
