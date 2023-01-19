@@ -4,13 +4,28 @@
     <!--springProperty name="logFilename" source="logging.file"/-->
 
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
-    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/spring.log}"/>
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
-    <include resource="co/elastic/logging/logback/boot/ecs-file-appender.xml" />
+
+    <property name="port" value="12201" />
+    <property name="host" value="greylogsrv" />
+
+
+    <!-- https://github.com/daglii/graylog-spring -->
+    <appender name="GRAYLOG" class="de.siegmar.logbackgelf.GelfUdpAppender">
+        <graylogHost>${host}</graylogHost>
+        <graylogPort>${port}</graylogPort>
+        <useCompression>true</useCompression>
+        <encoder class="de.siegmar.logbackgelf.GelfEncoder">
+            <includeCallerData>true</includeCallerData>
+            <includeRootCauseData>true</includeRootCauseData>
+            <includeLevelName>true</includeLevelName>
+            <staticField>app_name:contamsvc</staticField>
+        </encoder>
+    </appender>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
-        <appender-ref ref="ECS_JSON_FILE"/>
+        <appender-ref ref="GRAYLOG"/>
     </root>
 
     <logger name="org.pismo.cartoes" level="TRACE" />
